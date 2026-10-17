@@ -1,0 +1,19 @@
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary Excel lock files
+~$*.xlsx
+~$*.xls
+~$*.docx
+
+# Node / environment (if used)
+node_modules/
+.env

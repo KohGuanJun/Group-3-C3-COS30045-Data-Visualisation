@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospitalised Injuries from Road Crashes in Australia (2011–2021)</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="page-header">
+        <div class="container header-flex">
+            <div>
+                <h1>Hospitalised Injuries from Road Crashes</h1>
+                <p class="subtitle">Australian Road Traffic Hospitalisations (2011–2021)</p>
+            </div>
+            <div class="header-year">
+                <span id="active-year-label">2021</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-bar">
+        <div class="container">
+            <div class="tabs" role="tablist">
+                <button class="tab-btn active" data-view="overview" role="tab">Hospitalised Injuries</button>
+                <button class="tab-btn" data-view="jurisdiction" role="tab">Jurisdiction &amp; First Nations</button>
+                <button class="tab-btn" data-view="glossary" role="tab">Glossary &amp; Notes</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Filter Bar -->
+    <section class="filter-bar">
+        <div class="container filter-grid">
+            <div class="filter-field">
+                <label for="filter-year">Year</label>
+                <select id="filter-year">
+                    <option value="All">All</option>
+                    <option value="2021" selected>2021</option>
+                    <option value="2020">2020</option>
+                    <option value="2019">2019</option>
+                    <option value="2018">2018</option>
+                    <option value="2017">2017</option>
+                    <option value="2016">2016</option>
+                    <option value="2015">2015</option>
+                    <option value="2014">2014</option>
+                    <option value="2013">2013</option>
+                    <option value="2012">2012</option>
+                    <option value="2011">2011</option>
+                </select>
+            </div>
+
+            <div class="filter-field">
+                <label for="filter-remoteness">Remoteness</label>
+                <select id="filter-remoteness">
+                    <option value="All" selected>All</option>
+                    <option value="Major Cities">Major Cities</option>
+                    <option value="Regional">Regional</option>
+                    <option value="Remote">Remote</option>
+                </select>
+            </div>
+
+            <div class="filter-field">
+                <label for="filter-roaduser">Road User &amp; Vehicle Type</label>
+                <select id="filter-roaduser">
+                    <option value="All" selected>All</option>
+                    <option value="Driver">Driver</option>
+                    <option value="Motorcyclist">Motorcyclist</option>
+                    <option value="Pedal cyclist">Pedal cyclist</option>
+                    <option value="Passenger">Passenger</option>
+                    <option value="Pedestrian">Pedestrian</option>
+                </select>
+            </div>
+
+            <div class="filter-field">
+                <label for="filter-sex">Sex</label>
+                <select id="filter-sex">
+                    <option value="All" selected>All</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+            </div>
+
+            <div class="filter-field">
+                <label for="filter-age">Age Group</label>
+                <select id="filter-age">
+                    <option value="All" selected>All</option>
+                    <option value="0-7">0–7</option>
+                    <option value="8-16">8–16</option>
+                    <option value="17-25">17–25</option>
+                    <option value="26-39">26–39</option>
+                    <option value="40-64">40–64</option>
+                    <option value="65-74">65–74</option>
+                    <option value="75+">75+</option>
+                </select>
+            </div>
+
+            <div class="filter-action">
+                <button id="btn-reset-filters" type="button">Reset</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="container main-content">
+        <!-- View 1: Overview -->
+        <div id="view-overview" class="view-section active">
+            <!-- Summary Metrics -->
+            <div class="summary-row">
+                <div class="summary-card">
+                    <div class="summary-title">Hospitalised Injuries</div>
+                    <div class="summary-value" id="kpi-total-injuries">--</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-title">Average Number of Bed Days</div>
+                    <div class="summary-value" id="kpi-bed-days">--</div>
+                </div>
+            </div>
+
+            <!-- 2x2 Charts Grid -->
+            <div class="chart-grid">
+                <div class="chart-box">
+                    <h2>Annual Hospitalised Injuries, 2011–2021</h2>
+                    <div id="chart-1" class="chart-area"></div>
+                </div>
+
+                <div class="chart-box">
+                    <h2>Annual Hospitalised Injuries by Age Group</h2>
+                    <div id="chart-2" class="chart-area"></div>
+                </div>
+
+                <div class="chart-box">
+                    <h2>Annual Hospitalised Injuries by Remoteness</h2>
+                    <div id="chart-3" class="chart-area"></div>
+                </div>
+
+                <div class="chart-box">
+                    <h2>Annual Hospitalised Injuries by Road User</h2>
+                    <div id="chart-4" class="chart-area"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- View 2: Jurisdiction & First Nations -->
+        <div id="view-jurisdiction" class="view-section">
+            <div class="chart-box">
+                <h2>State &amp; Territory / First Nations Hospitalised Injuries</h2>
+                <div id="chart-5" class="chart-area"></div>
+            </div>
+        </div>
+
+        <!-- View 3: Glossary -->
+        <div id="view-glossary" class="view-section">
+            <div class="text-box">
+                <h2>Glossary &amp; Data Notes</h2>
+                <p><strong>Data Source:</strong> Bureau of Infrastructure and Transport Research Economics (BITRE) – Hospitalised Injury Data (2011–2021).</p>
+                <p><strong>Note on Count Data:</strong> The dataset reports absolute counts of hospitalised injuries. Direct comparison of raw counts across jurisdictions or demographic groups should take population size differences into account.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Tooltip -->
+    <div id="tooltip" class="d3-tooltip hidden"></div>
+
+    <!-- Footer -->
+    <footer class="page-footer">
+        <div class="container">
+            <p>COS30045 Data Visualisation &ndash; Group 3 (C3)</p>
+        </div>
+    </footer>
+
+    <script src="js/chart1.js"></script>
+    <script src="js/chart2.js"></script>
+    <script src="js/chart3.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
