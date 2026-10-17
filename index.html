@@ -16,7 +16,7 @@
                 <p class="subtitle">Australian Road Traffic Hospitalisations (2011–2021)</p>
             </div>
             <div class="header-year">
-                <span id="active-year-label">2021</span>
+                <span id="active-year-label">2011–2021</span>
             </div>
         </div>
     </header>
@@ -25,21 +25,21 @@
     <nav class="nav-bar">
         <div class="container">
             <div class="tabs" role="tablist">
-                <button class="tab-btn active" data-view="overview" role="tab">Hospitalised Injuries</button>
-                <button class="tab-btn" data-view="jurisdiction" role="tab">Jurisdiction &amp; First Nations</button>
+                <button class="tab-btn active" data-view="overview" role="tab">State &amp; National Trends</button>
+                <button class="tab-btn" data-view="demographics" role="tab">Demographics &amp; Road Users (Teammates)</button>
                 <button class="tab-btn" data-view="glossary" role="tab">Glossary &amp; Notes</button>
             </div>
         </div>
     </nav>
 
-    <!-- Filter Bar -->
+    <!-- Global Filter Bar (Clean: Only Year, State, Metric, Reset) -->
     <section class="filter-bar">
         <div class="container filter-grid">
             <div class="filter-field">
                 <label for="filter-year">Year</label>
                 <select id="filter-year">
-                    <option value="All">All</option>
-                    <option value="2021" selected>2021</option>
+                    <option value="All" selected>All Years (2011–2021)</option>
+                    <option value="2021">2021</option>
                     <option value="2020">2020</option>
                     <option value="2019">2019</option>
                     <option value="2018">2018</option>
@@ -54,47 +54,26 @@
             </div>
 
             <div class="filter-field">
-                <label for="filter-remoteness">Remoteness</label>
-                <select id="filter-remoteness">
-                    <option value="All" selected>All</option>
-                    <option value="Major Cities">Major Cities</option>
-                    <option value="Regional">Regional</option>
-                    <option value="Remote">Remote</option>
+                <label for="filter-state">State / Territory</label>
+                <select id="filter-state">
+                    <option value="All" selected>All Australia</option>
+                    <option value="NSW">NSW</option>
+                    <option value="Vic">Vic</option>
+                    <option value="Qld">Qld</option>
+                    <option value="WA">WA</option>
+                    <option value="SA">SA</option>
+                    <option value="Tas">Tas</option>
+                    <option value="NT">NT</option>
+                    <option value="ACT">ACT</option>
                 </select>
             </div>
 
             <div class="filter-field">
-                <label for="filter-roaduser">Road User &amp; Vehicle Type</label>
-                <select id="filter-roaduser">
-                    <option value="All" selected>All</option>
-                    <option value="Driver">Driver</option>
-                    <option value="Motorcyclist">Motorcyclist</option>
-                    <option value="Pedal cyclist">Pedal cyclist</option>
-                    <option value="Passenger">Passenger</option>
-                    <option value="Pedestrian">Pedestrian</option>
-                </select>
-            </div>
-
-            <div class="filter-field">
-                <label for="filter-sex">Sex</label>
-                <select id="filter-sex">
-                    <option value="All" selected>All</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                </select>
-            </div>
-
-            <div class="filter-field">
-                <label for="filter-age">Age Group</label>
-                <select id="filter-age">
-                    <option value="All" selected>All</option>
-                    <option value="0-7">0–7</option>
-                    <option value="8-16">8–16</option>
-                    <option value="17-25">17–25</option>
-                    <option value="26-39">26–39</option>
-                    <option value="40-64">40–64</option>
-                    <option value="65-74">65–74</option>
-                    <option value="75+">75+</option>
+                <label for="filter-metric">Metric</label>
+                <select id="filter-metric">
+                    <option value="Hospitalised_Injuries" selected>Hospitalised Injuries</option>
+                    <option value="Bed_Days">Total Bed Days</option>
+                    <option value="Average_Bed_Days">Average Bed Days</option>
                 </select>
             </div>
 
@@ -106,49 +85,94 @@
 
     <!-- Main Content -->
     <main class="container main-content">
-        <!-- View 1: Overview -->
+        <!-- View 1: State & National Trends -->
         <div id="view-overview" class="view-section active">
             <!-- Summary Metrics -->
             <div class="summary-row">
                 <div class="summary-card">
-                    <div class="summary-title">Hospitalised Injuries</div>
+                    <div>
+                        <div class="summary-title">Hospitalised Injuries</div>
+                        <div class="summary-sub" id="kpi-injuries-sub">2011–2021 cumulative total</div>
+                    </div>
                     <div class="summary-value" id="kpi-total-injuries">--</div>
                 </div>
                 <div class="summary-card">
-                    <div class="summary-title">Average Number of Bed Days</div>
-                    <div class="summary-value" id="kpi-bed-days">--</div>
+                    <div>
+                        <div class="summary-title">Total Bed Days</div>
+                        <div class="summary-sub" id="kpi-beddays-sub">Total hospital stay burden</div>
+                    </div>
+                    <div class="summary-value" id="kpi-total-beddays">--</div>
+                </div>
+                <div class="summary-card">
+                    <div>
+                        <div class="summary-title">Average Number of Bed Days</div>
+                        <div class="summary-sub" id="kpi-avg-sub">Weighted average per admission</div>
+                    </div>
+                    <div class="summary-value" id="kpi-avg-beddays">--</div>
                 </div>
             </div>
 
             <!-- 2x2 Charts Grid -->
             <div class="chart-grid">
+                <!-- Chart 1: Trend (with Trend View Mode inside its header) -->
                 <div class="chart-box">
-                    <h2>Annual Hospitalised Injuries, 2011–2021</h2>
+                    <div class="chart-header">
+                        <h2 id="title-chart-1">Annual Hospitalised Injuries, 2011–2021</h2>
+                        <div class="chart-controls">
+                            <select id="filter-trend-mode" class="chart-select" aria-label="Trend View Mode">
+                                <option value="single" selected>Single Line</option>
+                                <option value="multi">Compare 8 States</option>
+                                <option value="indexed">% Change Since 2011</option>
+                            </select>
+                        </div>
+                    </div>
                     <div id="chart-1" class="chart-area"></div>
                 </div>
 
+                <!-- Chart 2: State Bar Chart (with Sort & Raw/% Share inside its header) -->
                 <div class="chart-box">
-                    <h2>Annual Hospitalised Injuries by Age Group</h2>
+                    <div class="chart-header">
+                        <h2 id="title-chart-2">Hospitalised Injuries by State (2011–2021)</h2>
+                        <div class="chart-controls">
+                            <select id="filter-sort" class="chart-select" aria-label="Sort States By">
+                                <option value="value-desc" selected>Sort: High &rarr; Low</option>
+                                <option value="value-asc">Sort: Low &rarr; High</option>
+                                <option value="alpha">Sort: A &ndash; Z</option>
+                            </select>
+                            <div class="inline-toggle" id="toggle-bar-mode">
+                                <button type="button" class="mini-btn active" data-barmode="raw">Count</button>
+                                <button type="button" class="mini-btn" data-barmode="share">% Share</button>
+                            </div>
+                        </div>
+                    </div>
                     <div id="chart-2" class="chart-area"></div>
                 </div>
 
+                <!-- Chart 3: Average Bed Days by State -->
                 <div class="chart-box">
-                    <h2>Annual Hospitalised Injuries by Remoteness</h2>
+                    <div class="chart-header">
+                        <h2 id="title-chart-3">Average Bed Days by State (2011–2021)</h2>
+                        <span class="chart-hint">Red dashed line = National average</span>
+                    </div>
                     <div id="chart-3" class="chart-area"></div>
                 </div>
 
+                <!-- Chart 4: State Share Donut Chart -->
                 <div class="chart-box">
-                    <h2>Annual Hospitalised Injuries by Road User</h2>
+                    <div class="chart-header">
+                        <h2 id="title-chart-4">State Share of Hospitalised Injuries (2011–2021)</h2>
+                        <span class="chart-hint">Click any slice to select state</span>
+                    </div>
                     <div id="chart-4" class="chart-area"></div>
                 </div>
             </div>
         </div>
 
-        <!-- View 2: Jurisdiction & First Nations -->
-        <div id="view-jurisdiction" class="view-section">
-            <div class="chart-box">
-                <h2>State &amp; Territory / First Nations Hospitalised Injuries</h2>
-                <div id="chart-5" class="chart-area"></div>
+        <!-- View 2: Teammates' Section -->
+        <div id="view-demographics" class="view-section">
+            <div class="text-box">
+                <h2>Demographics, Remoteness &amp; Road User Analysis</h2>
+                <p>Reserved for team members' CSV datasets (Age Group, Sex, Road User, Remoteness, and First Nations).</p>
             </div>
         </div>
 
@@ -157,7 +181,7 @@
             <div class="text-box">
                 <h2>Glossary &amp; Data Notes</h2>
                 <p><strong>Data Source:</strong> Bureau of Infrastructure and Transport Research Economics (BITRE) – Hospitalised Injury Data (2011–2021).</p>
-                <p><strong>Note on Count Data:</strong> The dataset reports absolute counts of hospitalised injuries. Direct comparison of raw counts across jurisdictions or demographic groups should take population size differences into account.</p>
+                <p><strong>Note on Count Data:</strong> The dataset reports absolute counts of hospitalised injuries. Direct comparison of raw counts across jurisdictions (e.g., NSW or Victoria vs. Northern Territory) should take population size differences into account. Use the <em>% Change Since 2011</em> mode and <em>Average Bed Days</em> views to compare relative growth and injury severity fairly across states.</p>
             </div>
         </div>
     </main>
