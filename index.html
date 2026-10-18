@@ -168,11 +168,44 @@
             </div>
         </div>
 
-        <!-- View 2: Teammates' Section -->
+        <!-- View 2: Teammates' Section (Demographics, Remoteness & Road Users) -->
         <div id="view-demographics" class="view-section">
-            <div class="text-box">
-                <h2>Demographics, Remoteness &amp; Road User Analysis</h2>
-                <p>Reserved for team members' CSV datasets (Age Group, Sex, Road User, Remoteness, and First Nations).</p>
+            <div class="chart-grid">
+                <!-- 1: Road User -->
+                <div class="chart-box">
+                    <div class="chart-header">
+                        <h2 id="title-demo-1">Injuries by Road User (2011–2021)</h2>
+                        <span class="chart-hint">Top road user groups</span>
+                    </div>
+                    <div id="chart-road-user" class="chart-area"></div>
+                </div>
+
+                <!-- 2: Remoteness -->
+                <div class="chart-box">
+                    <div class="chart-header">
+                        <h2 id="title-demo-2">Share by Remoteness Area (2011–2021)</h2>
+                        <span class="chart-hint">Major Cities vs Regional &amp; Remote</span>
+                    </div>
+                    <div id="chart-remoteness" class="chart-area"></div>
+                </div>
+
+                <!-- 3: Age Group -->
+                <div class="chart-box">
+                    <div class="chart-header">
+                        <h2 id="title-demo-3">Injuries by Age Group (2011–2021)</h2>
+                        <span class="chart-hint">Distribution across age brackets</span>
+                    </div>
+                    <div id="chart-age" class="chart-area"></div>
+                </div>
+
+                <!-- 4: Sex -->
+                <div class="chart-box">
+                    <div class="chart-header">
+                        <h2 id="title-demo-4">Injuries by Sex (2011–2021)</h2>
+                        <span class="chart-hint">Male vs Female comparison</span>
+                    </div>
+                    <div id="chart-sex" class="chart-area"></div>
+                </div>
             </div>
         </div>
 
@@ -200,5 +233,6 @@
     <script src="js/chart2.js"></script>
     <script src="js/chart3.js"></script>
     <script src="js/main.js"></script>
+    <script src="js/demographics.js"></script>
 </body>
 </html>
