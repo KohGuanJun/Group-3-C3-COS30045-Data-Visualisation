@@ -1,0 +1,67 @@
+"year","status","remoteness","Sum(hospitalisations)","Sum(bed_days)"
+2011,"First Nations people","Major Cities",368,2157
+2011,"First Nations people","Regional",455,2373
+2011,"First Nations people","Remote",330,1983
+2011,"Non-Indigenous","Major Cities",20985,89284
+2011,"Non-Indigenous","Regional",9717,47965
+2011,"Non-Indigenous","Remote",789,3735
+2012,"First Nations people","Major Cities",429,2229
+2012,"First Nations people","Regional",545,2437
+2012,"First Nations people","Remote",426,2507
+2012,"Non-Indigenous","Major Cities",20858,87148
+2012,"Non-Indigenous","Regional",9536,46579
+2012,"Non-Indigenous","Remote",802,3824
+2013,"First Nations people","Major Cities",446,2113
+2013,"First Nations people","Regional",540,2800
+2013,"First Nations people","Remote",420,2631
+2013,"Non-Indigenous","Major Cities",22224,85720
+2013,"Non-Indigenous","Regional",9218,42371
+2013,"Non-Indigenous","Remote",765,3249
+2014,"First Nations people","Major Cities",486,2309
+2014,"First Nations people","Regional",565,2856
+2014,"First Nations people","Remote",392,2407
+2014,"Non-Indigenous","Major Cities",22572,82883
+2014,"Non-Indigenous","Regional",9358,42022
+2014,"Non-Indigenous","Remote",737,3643
+2015,"First Nations people","Major Cities",508,1886
+2015,"First Nations people","Regional",613,2727
+2015,"First Nations people","Remote",461,2834
+2015,"Non-Indigenous","Major Cities",23597,109643
+2015,"Non-Indigenous","Regional",9684,52983
+2015,"Non-Indigenous","Remote",694,3528
+2016,"First Nations people","Major Cities",551,2559
+2016,"First Nations people","Regional",648,3415
+2016,"First Nations people","Remote",454,2903
+2016,"Non-Indigenous","Major Cities",25390,134670
+2016,"Non-Indigenous","Regional",9846,61984
+2016,"Non-Indigenous","Remote",678,3469
+2017,"First Nations people","Major Cities",617,2643
+2017,"First Nations people","Regional",704,3201
+2017,"First Nations people","Remote",393,2768
+2017,"Non-Indigenous","Major Cities",25288,127399
+2017,"Non-Indigenous","Regional",10163,62541
+2017,"Non-Indigenous","Remote",653,3528
+2018,"First Nations people","Major Cities",642,2497
+2018,"First Nations people","Regional",797,4371
+2018,"First Nations people","Remote",466,3139
+2018,"Non-Indigenous","Major Cities",25236,121035
+2018,"Non-Indigenous","Regional",10278,63502
+2018,"Non-Indigenous","Remote",720,2763
+2019,"First Nations people","Major Cities",708,4364
+2019,"First Nations people","Regional",669,3229
+2019,"First Nations people","Remote",447,2567
+2019,"Non-Indigenous","Major Cities",25502,124113
+2019,"Non-Indigenous","Regional",10232,59663
+2019,"Non-Indigenous","Remote",638,2985
+2020,"First Nations people","Major Cities",810,4007
+2020,"First Nations people","Regional",946,5415
+2020,"First Nations people","Remote",504,2718
+2020,"Non-Indigenous","Major Cities",23823,109218
+2020,"Non-Indigenous","Regional",9936,54918
+2020,"Non-Indigenous","Remote",660,2828
+2021,"First Nations people","Major Cities",795,5128
+2021,"First Nations people","Regional",885,5265
+2021,"First Nations people","Remote",503,2726
+2021,"Non-Indigenous","Major Cities",25254,115139
+2021,"Non-Indigenous","Regional",10332,59185
+2021,"Non-Indigenous","Remote",600,3784
