@@ -9,8 +9,8 @@ function renderChart3BedDays(stateSummary, nationalAvgBedDays, filterState, onSe
     container.selectAll("*").remove();
 
     const node = container.node();
-    const width = node.clientWidth || 560;
-    const height = node.clientHeight || 290;
+    const width = node.clientWidth || 540;
+    const height = node.clientHeight || 210;
     const margin = { top: 18, right: 56, bottom: 32, left: 52 };
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
@@ -128,8 +128,8 @@ function renderChart4StateShareDonut(stateSummary, filterState, onSelectState) {
     container.selectAll("*").remove();
 
     const node = container.node();
-    const width = node.clientWidth || 560;
-    const height = node.clientHeight || 290;
+    const width = node.clientWidth || 540;
+    const height = node.clientHeight || 210;
 
     const sorted = [...stateSummary].sort((a, b) =>
         d3.descending(a.Hospitalised_Injuries, b.Hospitalised_Injuries)
@@ -223,14 +223,16 @@ function renderChart4StateShareDonut(stateSummary, filterState, onSelectState) {
         .style("fill", "#1f2937")
         .text(d3.format(",")(totalInjuries));
 
-    const legend = svg.append("g").attr("transform", `translate(${width * 0.6}, 26)`);
+    const rowSpacing = Math.min(24, (height - 24) / Math.max(sorted.length, 1));
+    const startY = (height - (sorted.length - 1) * rowSpacing) / 2;
+    const legend = svg.append("g").attr("transform", `translate(${width * 0.58}, ${startY})`);
 
     const rows = legend
         .selectAll(".legend-item")
         .data(sorted)
         .join("g")
         .attr("class", "legend-item")
-        .attr("transform", (d, i) => `translate(0, ${i * 28})`)
+        .attr("transform", (d, i) => `translate(0, ${i * rowSpacing})`)
         .style("cursor", "pointer")
         .on("click", (event, d) => {
             if (onSelectState) {

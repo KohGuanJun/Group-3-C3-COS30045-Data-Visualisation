@@ -25,8 +25,8 @@ function renderChart1Trend(data, filterState, onSelectYear, onSelectState) {
     container.selectAll("*").remove();
 
     const node = container.node();
-    const width = node.clientWidth || 560;
-    const height = node.clientHeight || 290;
+    const width = node.clientWidth || 540;
+    const height = node.clientHeight || 210;
     const margin = { top: 20, right: 48, bottom: 36, left: 60 };
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
@@ -317,9 +317,9 @@ function renderChart2StateBars(stateSummary, filterState, onSelectState) {
     container.selectAll("*").remove();
 
     const node = container.node();
-    const width = node.clientWidth || 560;
-    const height = node.clientHeight || 290;
-    const margin = { top: 20, right: 20, bottom: 36, left: 60 };
+    const width = node.clientWidth || 540;
+    const height = node.clientHeight || 210;
+    const margin = { top: 18, right: 20, bottom: 28, left: 60 };
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
