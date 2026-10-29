@@ -41,10 +41,10 @@ function updateDemographicsCharts() {
         ? rawDemoData
         : rawDemoData.filter((d) => String(d["Calendar year"]) === String(yearVal));
 
-    renderHorizontalBar("#chart-road-user", filtered, "Road user", metricVal, "#2563eb");
+    renderHorizontalBar("#chart-road-user", filtered, "Road user", metricVal, "#0072B2");
     renderRemotenessDonut("#chart-remoteness", filtered, metricVal);
-    renderVerticalBar("#chart-age", filtered, "Age group", metricVal, "#0284c7");
-    renderVerticalBar("#chart-sex", filtered, "Sex", metricVal, "#4f46e5");
+    renderVerticalBar("#chart-age", filtered, "Age group", metricVal, "#009E73");
+    renderVerticalBar("#chart-sex", filtered, "Sex", metricVal, "#D55E00");
 }
 
 function renderHorizontalBar(selector, data, groupCol, metric, barColor) {
@@ -263,7 +263,7 @@ function renderRemotenessDonut(selector, data, metric) {
 
     const color = d3.scaleOrdinal()
         .domain(summary.map((d) => d.key))
-        .range(["#1d4ed8", "#0284c7", "#38bdf8", "#64748b", "#94a3b8"]);
+        .range(["#0072B2", "#D55E00", "#009E73", "#CC79A7", "#525252"]);
 
     const pie = d3.pie().value((d) => d.val).sort(null);
     const arc = d3.arc().innerRadius(radius * 0.54).outerRadius(radius);
