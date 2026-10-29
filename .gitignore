@@ -14,6 +14,9 @@ desktop.ini
 ~$*.xls
 ~$*.docx
 
+# Local raw reference Excel workbooks
+data/raw data/
+
 # Node / environment (if used)
 node_modules/
 .env

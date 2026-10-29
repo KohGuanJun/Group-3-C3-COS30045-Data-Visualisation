@@ -1,7 +1,16 @@
 /**
  * chart2.js
- * Chart 3: Average Bed Days by State (Horizontal Bar Chart with National Average Reference Line)
- * Chart 4: State Share of Hospitalised Injuries (Pie / Donut Chart with Legend)
+ * Renders Chart 3 (Average Bed Days Horizontal Bar Chart with National Benchmark)
+ * and Chart 4 (State Share Donut Chart with Accessible Okabe-Ito Palette).
+ *
+ * Accessibility & Design Features:
+ * - High-contrast dark charcoal benchmark line (replaces red dashed line for CVD safety).
+ * - Distinct Okabe-Ito 8-colour palette + white slice borders on Donut chart so every state
+ *   is clearly distinguishable for colourblind and low-vision users.
+ *
+ * GenAI Acknowledgement:
+ * D3 v7 horizontal bar benchmark layout and responsive donut legend positioning were refined
+ * with AI assistance (Prompts: accessible benchmark bar chart and Okabe-Ito donut chart in D3 v7).
  */
 
 function renderChart3BedDays(stateSummary, nationalAvgBedDays, filterState, onSelectState) {
@@ -10,8 +19,8 @@ function renderChart3BedDays(stateSummary, nationalAvgBedDays, filterState, onSe
 
     const node = container.node();
     const width = node.clientWidth || 540;
-    const height = node.clientHeight || 210;
-    const margin = { top: 18, right: 56, bottom: 32, left: 52 };
+    const height = node.clientHeight || 205;
+    const margin = { top: 20, right: 56, bottom: 26, left: 48 };
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
@@ -21,6 +30,8 @@ function renderChart3BedDays(stateSummary, nationalAvgBedDays, filterState, onSe
 
     const svg = container
         .append("svg")
+        .attr("role", "img")
+        .attr("aria-label", "Horizontal bar chart comparing average hospital bed days per road crash injury across states against the national average")
         .attr("viewBox", `0 0 ${width} ${height}`)
         .attr("width", "100%")
         .attr("height", "100%");
@@ -31,7 +42,7 @@ function renderChart3BedDays(stateSummary, nationalAvgBedDays, filterState, onSe
         .scaleBand()
         .domain(sorted.map((d) => d.State))
         .range([0, innerHeight])
-        .padding(0.28);
+        .padding(0.26);
 
     const x = d3
         .scaleLinear()
@@ -47,19 +58,20 @@ function renderChart3BedDays(stateSummary, nationalAvgBedDays, filterState, onSe
         .call((g) => g.selectAll("line").attr("stroke", "#e5e7eb").attr("stroke-dasharray", "3,3"))
         .selectAll("text")
         .style("font-size", "11px")
-        .style("fill", "#6b7280");
+        .style("fill", "#4b5563");
 
     // Y Axis
     g.append("g")
         .call(d3.axisLeft(y).tickSize(0))
         .call((g) => g.select(".domain").remove())
         .selectAll("text")
-        .style("font-size", "12px")
-        .style("font-weight", "600")
-        .style("fill", "#374151");
+        .style("font-size", "11.5px")
+        .style("font-weight", "700")
+        .style("fill", "#1f2937");
 
     const tooltip = d3.select("#tooltip");
 
+    // Bars: High-contrast Strong Blue (#0072B2) for above national avg, muted slate (#8C96A6) for below
     g.selectAll(".bed-bar")
         .data(sorted)
         .join("rect")
@@ -70,17 +82,21 @@ function renderChart3BedDays(stateSummary, nationalAvgBedDays, filterState, onSe
         .attr("width", (d) => x(d.Average_Bed_Days))
         .attr("rx", 3)
         .attr("fill", (d) =>
-            d.Average_Bed_Days > nationalAvgBedDays ? "#0284c7" : "#64748b"
+            d.Average_Bed_Days >= nationalAvgBedDays ? UI_COLORS.aboveAvgBar : UI_COLORS.belowAvgBar
         )
+        .attr("stroke", (d) => (filterState.state === d.State ? "#111827" : "none"))
+        .attr("stroke-width", 2)
         .attr("opacity", (d) =>
-            filterState.state === "All" || filterState.state === d.State ? 1 : 0.35
+            filterState.state === "All" || filterState.state === d.State ? 1 : 0.28
         )
         .style("cursor", "pointer")
         .on("mouseenter", (event, d) => {
+            const statusText =
+                d.Average_Bed_Days >= nationalAvgBedDays ? "Above national avg" : "Below national avg";
             tooltip
                 .classed("hidden", false)
                 .html(
-                    `<strong>${d.State}</strong><br/>` +
+                    `<strong>${d.State}</strong> (${statusText})<br/>` +
                     `Avg Bed Days: <strong>${d.Average_Bed_Days.toFixed(2)} days</strong><br/>` +
                     `National Avg: <strong>${nationalAvgBedDays.toFixed(2)} days</strong>`
                 );
@@ -98,7 +114,7 @@ function renderChart3BedDays(stateSummary, nationalAvgBedDays, filterState, onSe
             }
         });
 
-    // Value Labels
+    // Direct Value Labels
     g.selectAll(".bed-label")
         .data(sorted)
         .join("text")
@@ -107,19 +123,28 @@ function renderChart3BedDays(stateSummary, nationalAvgBedDays, filterState, onSe
         .attr("y", (d) => y(d.State) + y.bandwidth() / 2 + 4)
         .text((d) => `${d.Average_Bed_Days.toFixed(1)}d`)
         .style("font-size", "11px")
-        .style("font-weight", "600")
-        .style("fill", "#374151");
+        .style("font-weight", "700")
+        .style("fill", "#1f2937");
 
-    // National Average Reference Line
+    // High-contrast Dark Charcoal Benchmark Line + Direct Label (Colourblind-safe)
     if (nationalAvgBedDays > 0) {
         g.append("line")
             .attr("x1", x(nationalAvgBedDays))
             .attr("x2", x(nationalAvgBedDays))
-            .attr("y1", 0)
+            .attr("y1", -4)
             .attr("y2", innerHeight)
-            .attr("stroke", "#dc2626")
-            .attr("stroke-width", 1.8)
-            .attr("stroke-dasharray", "4,4");
+            .attr("stroke", UI_COLORS.benchmarkLine)
+            .attr("stroke-width", 2)
+            .attr("stroke-dasharray", "5,3");
+
+        g.append("text")
+            .attr("x", x(nationalAvgBedDays))
+            .attr("y", -7)
+            .attr("text-anchor", "middle")
+            .style("font-size", "10.5px")
+            .style("font-weight", "700")
+            .style("fill", "#111827")
+            .text(`Avg: ${nationalAvgBedDays.toFixed(1)}d`);
     }
 }
 
@@ -129,7 +154,7 @@ function renderChart4StateShareDonut(stateSummary, filterState, onSelectState) {
 
     const node = container.node();
     const width = node.clientWidth || 540;
-    const height = node.clientHeight || 210;
+    const height = node.clientHeight || 205;
 
     const sorted = [...stateSummary].sort((a, b) =>
         d3.descending(a.Hospitalised_Injuries, b.Hospitalised_Injuries)
@@ -139,29 +164,17 @@ function renderChart4StateShareDonut(stateSummary, filterState, onSelectState) {
 
     const svg = container
         .append("svg")
+        .attr("role", "img")
+        .attr("aria-label", "Donut chart showing proportional share of hospitalised road crash injuries across the eight Australian states and territories")
         .attr("viewBox", `0 0 ${width} ${height}`)
         .attr("width", "100%")
         .attr("height", "100%");
 
-    const radius = Math.min(width * 0.44, height) / 2 - 16;
-    const centerX = width * 0.32;
+    const radius = Math.min(width * 0.42, height) / 2 - 12;
+    const centerX = width * 0.28;
     const centerY = height / 2;
 
     const g = svg.append("g").attr("transform", `translate(${centerX},${centerY})`);
-
-    const color = d3
-        .scaleOrdinal()
-        .domain(["NSW", "Vic", "Qld", "WA", "SA", "Tas", "NT", "ACT"])
-        .range([
-            "#1d4ed8",
-            "#2563eb",
-            "#3b82f6",
-            "#0284c7",
-            "#0ea5e9",
-            "#38bdf8",
-            "#64748b",
-            "#94a3b8"
-        ]);
 
     const pie = d3
         .pie()
@@ -179,11 +192,11 @@ function renderChart4StateShareDonut(stateSummary, filterState, onSelectState) {
         .data(pie(sorted))
         .join("path")
         .attr("d", arc)
-        .attr("fill", (d) => color(d.data.State))
+        .attr("fill", (d) => STATE_PALETTE[d.data.State] || UI_COLORS.primaryLine)
         .attr("stroke", "#ffffff")
-        .attr("stroke-width", 2)
+        .attr("stroke-width", 2.2)
         .attr("opacity", (d) =>
-            filterState.state === "All" || filterState.state === d.data.State ? 1 : 0.35
+            filterState.state === "All" || filterState.state === d.data.State ? 1 : 0.25
         )
         .style("cursor", "pointer")
         .on("mouseenter", (event, d) => {
@@ -212,20 +225,21 @@ function renderChart4StateShareDonut(stateSummary, filterState, onSelectState) {
         .attr("text-anchor", "middle")
         .attr("dy", "-0.2em")
         .style("font-size", "11px")
-        .style("fill", "#6b7280")
+        .style("fill", "#4b5563")
         .text("Total");
 
     g.append("text")
         .attr("text-anchor", "middle")
         .attr("dy", "1.1em")
-        .style("font-size", "15px")
+        .style("font-size", "14.5px")
         .style("font-weight", "700")
-        .style("fill", "#1f2937")
+        .style("fill", "#111827")
         .text(d3.format(",")(totalInjuries));
 
-    const rowSpacing = Math.min(24, (height - 24) / Math.max(sorted.length, 1));
+    // Accessible Right Legend with distinct swatches + aligned numbers & percentages
+    const rowSpacing = Math.min(22, (height - 20) / Math.max(sorted.length, 1));
     const startY = (height - (sorted.length - 1) * rowSpacing) / 2;
-    const legend = svg.append("g").attr("transform", `translate(${width * 0.58}, ${startY})`);
+    const legend = svg.append("g").attr("transform", `translate(${width * 0.54}, ${startY})`);
 
     const rows = legend
         .selectAll(".legend-item")
@@ -233,6 +247,9 @@ function renderChart4StateShareDonut(stateSummary, filterState, onSelectState) {
         .join("g")
         .attr("class", "legend-item")
         .attr("transform", (d, i) => `translate(0, ${i * rowSpacing})`)
+        .attr("opacity", (d) =>
+            filterState.state === "All" || filterState.state === d.State ? 1 : 0.35
+        )
         .style("cursor", "pointer")
         .on("click", (event, d) => {
             if (onSelectState) {
@@ -246,22 +263,23 @@ function renderChart4StateShareDonut(stateSummary, filterState, onSelectState) {
         .attr("height", 12)
         .attr("rx", 2)
         .attr("y", -10)
-        .attr("fill", (d) => color(d.State));
+        .attr("fill", (d) => STATE_PALETTE[d.State] || UI_COLORS.primaryLine);
 
     rows.append("text")
-        .attr("x", 20)
+        .attr("x", 18)
         .attr("y", 0)
         .style("font-size", "12px")
-        .style("font-weight", "600")
-        .style("fill", "#374151")
+        .style("font-weight", "700")
+        .style("fill", "#1f2937")
         .text((d) => d.State);
 
     rows.append("text")
-        .attr("x", 155)
+        .attr("x", 185)
         .attr("y", 0)
         .attr("text-anchor", "end")
-        .style("font-size", "12px")
-        .style("fill", "#4b5563")
+        .style("font-size", "11.5px")
+        .style("font-weight", "600")
+        .style("fill", "#374151")
         .text((d) => {
             const pct = ((d.Hospitalised_Injuries / totalInjuries) * 100).toFixed(1);
             return `${d3.format(",")(d.Hospitalised_Injuries)} (${pct}%)`;

@@ -209,13 +209,25 @@ body {
 }
 
 .yoy-up {
-    color: #dc2626;
-    font-weight: 600;
+    color: #b45309; /* Colourblind-safe dark amber/orange instead of pure red */
+    font-weight: 700;
 }
 
 .yoy-down {
-    color: #16a34a;
-    font-weight: 600;
+    color: #0072B2; /* Colourblind-safe strong blue instead of green */
+    font-weight: 700;
+}
+
+/* Key Finding Strip (Audience Takeaway) */
+.finding-bar {
+    background-color: #f0f7ff;
+    border: 1px solid #bfdbfe;
+    border-left: 4px solid #0072B2;
+    border-radius: 5px;
+    padding: 5px 12px;
+    font-size: 12px;
+    color: #1e293b;
+    flex-shrink: 0;
 }
 
 /* 2x2 Chart Grid: stretches to fill remaining height without scrolling */

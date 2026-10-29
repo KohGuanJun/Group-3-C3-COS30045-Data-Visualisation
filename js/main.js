@@ -1,24 +1,23 @@
 /**
  * main.js
- * Coordinates default "All" state, dynamic YoY KPI calculations, and interactive chart modes.
+ * State management, CSV loading (`data/state_by_year.csv`), dynamic Key Findings generation,
+ * and cross-chart interaction coordination for the State & National Trends view.
+ *
+ * GenAI Acknowledgement:
+ * State management structure, weighted average calculation, and dynamic insight text logic
+ * were developed with AI assistance (Prompts: coordinate D3 dashboard filters and dynamic data findings).
  */
 
 const filterState = {
     year: "All",
     state: "All",
     metric: "Hospitalised_Injuries",
-    trendMode: "single",   // "single" | "multi" | "indexed"
-    barMode: "raw",        // "raw" | "share"
+    trendMode: "single", // "single" | "multi" | "indexed"
+    barMode: "raw",      // "raw" | "share"
     sort: "value-desc"
 };
 
 let rawStateData = [];
-
-const metricLabels = {
-    Hospitalised_Injuries: "Hospitalised Injuries",
-    Bed_Days: "Total Bed Days",
-    Average_Bed_Days: "Average Bed Days"
-};
 
 function getStateSummaryForSelectedYear() {
     const yearRows =
@@ -42,7 +41,7 @@ function getStateSummaryForSelectedYear() {
     });
 }
 
-function updateKPIs() {
+function updateKPIsAndFinding(stateSummary, nationalAvgBedDays) {
     const kpiRows = rawStateData.filter((d) => {
         const matchYear = filterState.year === "All" || String(d.Year) === String(filterState.year);
         const matchState = filterState.state === "All" || d.State === filterState.state;
@@ -57,8 +56,10 @@ function updateKPIs() {
     document.getElementById("kpi-total-beddays").textContent = d3.format(",")(totalBedDays);
     document.getElementById("kpi-avg-beddays").textContent = weightedAvgBedDays.toFixed(2);
 
-    // Dynamic YoY or 10-year change subtitle
+    // Accessible YoY / 10-year change with directional triangles (▲ / ▼) + non-red-green colours
     const injSub = document.getElementById("kpi-injuries-sub");
+    let growthTextForFinding = "";
+
     if (filterState.year === "All") {
         const rows2011 = rawStateData.filter(
             (d) => d.Year === 2011 && (filterState.state === "All" || d.State === filterState.state)
@@ -69,8 +70,10 @@ function updateKPIs() {
         const sum2011 = d3.sum(rows2011, (d) => d.Hospitalised_Injuries);
         const sum2021 = d3.sum(rows2021, (d) => d.Hospitalised_Injuries);
         const pct10Yr = sum2011 > 0 ? (((sum2021 - sum2011) / sum2011) * 100).toFixed(1) : "0.0";
-        const sign = pct10Yr >= 0 ? "+" : "";
-        injSub.innerHTML = `2011–2021 total (<span class="${pct10Yr >= 0 ? "yoy-up" : "yoy-down"}">${sign}${pct10Yr}%</span> from 2011 to 2021)`;
+        const arrow = pct10Yr >= 0 ? "▲ +" : "▼ ";
+        const cls = pct10Yr >= 0 ? "yoy-up" : "yoy-down";
+        injSub.innerHTML = `2011–2021 total (<span class="${cls}">${arrow}${pct10Yr}%</span> from 2011 to 2021)`;
+        growthTextForFinding = `${pct10Yr >= 0 ? "+" : ""}${pct10Yr}% since 2011`;
     } else {
         const yrNum = Number(filterState.year);
         if (yrNum > 2011) {
@@ -79,10 +82,41 @@ function updateKPIs() {
             );
             const prevSum = d3.sum(prevRows, (d) => d.Hospitalised_Injuries);
             const yoy = prevSum > 0 ? (((totalInjuries - prevSum) / prevSum) * 100).toFixed(1) : "0.0";
-            const sign = yoy >= 0 ? "+" : "";
-            injSub.innerHTML = `<span class="${yoy >= 0 ? "yoy-up" : "yoy-down"}">${sign}${yoy}%</span> vs ${yrNum - 1} (${d3.format(",")(prevSum)})`;
+            const arrow = yoy >= 0 ? "▲ +" : "▼ ";
+            const cls = yoy >= 0 ? "yoy-up" : "yoy-down";
+            injSub.innerHTML = `<span class="${cls}">${arrow}${yoy}%</span> vs ${yrNum - 1} (${d3.format(",")(prevSum)})`;
+            growthTextForFinding = `${yoy >= 0 ? "+" : ""}${yoy}% vs ${yrNum - 1}`;
         } else {
             injSub.textContent = "Baseline reporting year (2011)";
+            growthTextForFinding = "2011 baseline year";
+        }
+    }
+
+    // Dynamic Key Finding banner for audiences (Tutor feedback: "Very good findings - useful for audiences")
+    const findingEl = document.getElementById("state-key-finding");
+    if (findingEl && stateSummary.length) {
+        const topVol = [...stateSummary].sort((a, b) => d3.descending(a.Hospitalised_Injuries, b.Hospitalised_Injuries))[0];
+        const topSev = [...stateSummary].sort((a, b) => d3.descending(a.Average_Bed_Days, b.Average_Bed_Days))[0];
+        const natTotal = d3.sum(stateSummary, (d) => d.Hospitalised_Injuries) || 1;
+        const periodLabel = filterState.year === "All" ? "2011–2021" : filterState.year;
+
+        if (filterState.state === "All") {
+            const top3Sum = [...stateSummary]
+                .sort((a, b) => d3.descending(a.Hospitalised_Injuries, b.Hospitalised_Injuries))
+                .slice(0, 3)
+                .reduce((acc, cur) => acc + cur.Hospitalised_Injuries, 0);
+            const top3Pct = ((top3Sum / natTotal) * 100).toFixed(1);
+
+            findingEl.innerHTML =
+                `<strong>Key Finding (${periodLabel}):</strong> Populous eastern states (<strong>NSW, Vic, Qld</strong>) account for <strong>${top3Pct}%</strong> of raw hospitalisations (led by <strong>${topVol.State}</strong> with ${d3.format(",")(topVol.Hospitalised_Injuries)}), whereas smaller/remote jurisdictions experience longer hospital stays—led by <strong>${topSev.State} (${topSev.Average_Bed_Days.toFixed(1)} bed days</strong> vs ${nationalAvgBedDays.toFixed(1)}d national avg), reflecting higher crash severity.`;
+        } else {
+            const stObj = stateSummary.find((d) => d.State === filterState.state);
+            const sharePct = stObj ? ((stObj.Hospitalised_Injuries / natTotal) * 100).toFixed(1) : "0.0";
+            const diffBed = stObj ? (stObj.Average_Bed_Days - nationalAvgBedDays).toFixed(2) : "0.00";
+            const bedCompare = Number(diffBed) >= 0 ? `${diffBed}d above` : `${Math.abs(Number(diffBed)).toFixed(2)}d below`;
+
+            findingEl.innerHTML =
+                `<strong>${filterState.state} Insight (${periodLabel}):</strong> Recorded <strong>${d3.format(",")(totalInjuries)}</strong> hospitalised injuries (<strong>${sharePct}%</strong> of national total; ${growthTextForFinding}), with an average stay of <strong>${weightedAvgBedDays.toFixed(2)} bed days</strong> (${bedCompare} the ${nationalAvgBedDays.toFixed(2)}d national benchmark).`;
         }
     }
 }
@@ -117,12 +151,12 @@ function updateDashboard() {
     document.getElementById("title-chart-4").textContent =
         `State Share of Hospitalised Injuries (${periodText})`;
 
-    updateKPIs();
-
     const stateSummary = getStateSummaryForSelectedYear();
     const natTotalInjuries = d3.sum(stateSummary, (d) => d.Hospitalised_Injuries);
     const natTotalBedDays = d3.sum(stateSummary, (d) => d.Bed_Days);
     const nationalAvgBedDays = natTotalInjuries > 0 ? natTotalBedDays / natTotalInjuries : 0;
+
+    updateKPIsAndFinding(stateSummary, nationalAvgBedDays);
 
     renderChart1Trend(
         rawStateData,
@@ -171,7 +205,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // Dropdown listeners
+    // Global dropdown listeners (< 5 selections)
     document.getElementById("filter-year").addEventListener("change", (e) => {
         filterState.year = e.target.value;
         updateDashboard();
@@ -187,6 +221,7 @@ document.addEventListener("DOMContentLoaded", () => {
         updateDashboard();
     });
 
+    // Chart-level controls
     document.getElementById("filter-trend-mode").addEventListener("change", (e) => {
         filterState.trendMode = e.target.value;
         updateDashboard();
@@ -197,7 +232,6 @@ document.addEventListener("DOMContentLoaded", () => {
         updateDashboard();
     });
 
-    // Inline toggle for Chart 2 (Raw Count vs % Share)
     document.querySelectorAll("#toggle-bar-mode .mini-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
             document.querySelectorAll("#toggle-bar-mode .mini-btn").forEach((b) => b.classList.remove("active"));
@@ -207,7 +241,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // Reset button (resets to All)
+    // Reset button
     document.getElementById("btn-reset-filters").addEventListener("click", () => {
         filterState.year = "All";
         filterState.state = "All";
@@ -229,14 +263,14 @@ document.addEventListener("DOMContentLoaded", () => {
         updateDashboard();
     });
 
-    // Load CSV
+    // Load state_by_year.csv
     d3.csv("data/state_by_year.csv", d3.autoType)
         .then((data) => {
             rawStateData = data;
             updateDashboard();
         })
         .catch((err) => {
-            console.warn("Could not fetch data/state_by_year.csv via file://. Open with Live Server or HTTP server.", err);
+            console.warn("Could not fetch data/state_by_year.csv via file://. Open with Live Server.", err);
         });
 
     window.addEventListener("resize", () => updateDashboard());

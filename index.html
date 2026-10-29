@@ -87,6 +87,11 @@
     <main class="container main-content">
         <!-- View 1: State & National Trends -->
         <div id="view-overview" class="view-section active">
+            <!-- Dynamic Key Finding Banner (Storytelling & Audience Takeaway) -->
+            <div class="finding-bar" id="state-key-finding" role="status" aria-live="polite">
+                <strong>Key Finding:</strong> Loading state hospitalisation insights...
+            </div>
+
             <!-- Summary Metrics -->
             <div class="summary-row">
                 <div class="summary-card">
@@ -152,7 +157,7 @@
                 <div class="chart-box">
                     <div class="chart-header">
                         <h2 id="title-chart-3">Average Bed Days by State (2011–2021)</h2>
-                        <span class="chart-hint">Red dashed line = National average</span>
+                        <span class="chart-hint">Dashed line = National average</span>
                     </div>
                     <div id="chart-3" class="chart-area"></div>
                 </div>
@@ -229,6 +234,7 @@
         </div>
     </footer>
 
+    <script src="js/constants.js"></script>
     <script src="js/chart1.js"></script>
     <script src="js/chart2.js"></script>
     <script src="js/chart3.js"></script>
