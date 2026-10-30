@@ -1,6 +1,13 @@
 /**
  * demographics.js
  * Renders Road User, Remoteness, Age Group, and Sex charts from KNIME cleaned CSV.
+ *
+ * Accessibility & Design Features:
+ * - SVG <title> and <desc> elements for screen-reader compatibility (W8).
+ * - tabindex, role="button", aria-label on interactive bars and donut slices (W8).
+ * - Enter/Space keydown handlers mirror click behaviour (W8).
+ * - Smooth D3 transitions on bar width/height updates (W10).
+ * - Dynamic Key Finding banner summarising top insights from current data (W10).
  */
 
 let rawDemoData = [];
@@ -11,6 +18,77 @@ function getDemoMetricValue(rows, metric) {
     if (metric === "Bed_Days") return bedDays;
     if (metric === "Average_Bed_Days") return injuries > 0 ? bedDays / injuries : 0;
     return injuries;
+}
+
+// ── Dynamic Key Finding banner for Demographics tab (W10) ─────────────────────
+function updateDemoKeyFinding(filtered, metricVal) {
+    const view = document.getElementById("view-demographics");
+    if (!view) return;
+
+    // Only update if the selection bar isn't already showing a cross-filter message
+    let bar = document.getElementById("demo-selection-bar");
+    if (bar) return; // demographics-select.js manages this bar when a filter is active
+
+    // Create or reuse a permanent insight bar (only shown when no cross-filter active)
+    let insightBar = document.getElementById("demo-insight-bar");
+    if (!insightBar) {
+        insightBar = document.createElement("div");
+        insightBar.id = "demo-insight-bar";
+        insightBar.className = "finding-bar";
+        insightBar.setAttribute("role", "status");
+        insightBar.setAttribute("aria-live", "polite");
+        view.insertBefore(insightBar, view.firstChild);
+    }
+
+    if (!filtered.length) { insightBar.innerHTML = ""; return; }
+
+    const metricLabel = (typeof metricLabels !== "undefined" && metricLabels[metricVal])
+        ? metricLabels[metricVal] : "Hospitalised Injuries";
+
+    // Road user top group
+    const roadGroups = {};
+    filtered.forEach((d) => {
+        const k = d["Road user"];
+        if (!k) return;
+        roadGroups[k] = (roadGroups[k] || 0) + getDemoMetricValue([d], metricVal);
+    });
+    const topRoadUser = Object.entries(roadGroups).sort((a, b) => b[1] - a[1])[0];
+
+    // Age group top
+    const ageGroups = {};
+    filtered.forEach((d) => {
+        const k = d["Age group"];
+        if (!k) return;
+        ageGroups[k] = (ageGroups[k] || 0) + getDemoMetricValue([d], metricVal);
+    });
+    const topAge = Object.entries(ageGroups).sort((a, b) => b[1] - a[1])[0];
+
+    // Sex breakdown (Male vs Female share)
+    const sexGroups = {};
+    filtered.forEach((d) => {
+        const k = d["Sex"];
+        if (!k) return;
+        sexGroups[k] = (sexGroups[k] || 0) + getDemoMetricValue([d], metricVal);
+    });
+    const totalSex = Object.values(sexGroups).reduce((a, b) => a + b, 0) || 1;
+    const malePct = sexGroups["Male"] ? ((sexGroups["Male"] / totalSex) * 100).toFixed(1) : "N/A";
+
+    // Remoteness top
+    const remGroups = {};
+    filtered.forEach((d) => {
+        const k = d["ABS remoteness area"];
+        if (!k) return;
+        remGroups[k] = (remGroups[k] || 0) + getDemoMetricValue([d], metricVal);
+    });
+    const topRemote = Object.entries(remGroups).sort((a, b) => b[1] - a[1])[0];
+
+    let html = "<strong>Key Finding:</strong> ";
+    const parts = [];
+    if (topRoadUser) parts.push(`<strong>${topRoadUser[0]}</strong> is the top road user group (${d3.format(",")(Math.round(topRoadUser[1]))})`);
+    if (topAge)      parts.push(`<strong>${topAge[0]}</strong> age bracket has the most injuries (${d3.format(",")(Math.round(topAge[1]))})`);
+    if (malePct !== "N/A") parts.push(`<strong>Males</strong> account for <strong>${malePct}%</strong> of cases`);
+    if (topRemote)   parts.push(`<strong>${topRemote[0]}</strong> areas contribute the largest share by remoteness`);
+    insightBar.innerHTML = html + parts.join(" · ");
 }
 
 function updateDemographicsCharts() {
@@ -45,6 +123,8 @@ function updateDemographicsCharts() {
     renderRemotenessDonut("#chart-remoteness", filtered, metricVal);
     renderVerticalBar("#chart-age", filtered, "Age group", metricVal, "#009E73");
     renderVerticalBar("#chart-sex", filtered, "Sex", metricVal, "#D55E00");
+
+    updateDemoKeyFinding(filtered, metricVal);
 }
 
 function renderHorizontalBar(selector, data, groupCol, metric, barColor) {
@@ -65,10 +145,20 @@ function renderHorizontalBar(selector, data, groupCol, metric, barColor) {
         return { key, val: getDemoMetricValue(rows, metric) };
     }).sort((a, b) => d3.descending(a.val, b.val));
 
+    const svgTitleId = `demo-hbar-title-${groupCol.replace(/\s+/g,"-")}`;
+    const svgDescId  = `demo-hbar-desc-${groupCol.replace(/\s+/g,"-")}`;
+
     const svg = container.append("svg")
+        .attr("role", "img")
+        .attr("aria-labelledby", `${svgTitleId} ${svgDescId}`)
         .attr("viewBox", `0 0 ${width} ${height}`)
         .attr("width", "100%")
         .attr("height", "100%");
+
+    svg.append("title").attr("id", svgTitleId)
+        .text(`Hospitalised Injuries by ${groupCol}`);
+    svg.append("desc").attr("id", svgDescId)
+        .text(`Horizontal bar chart showing hospitalised road crash injuries broken down by ${groupCol}. Click a bar to cross-filter the other charts.`);
 
     const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
@@ -104,15 +194,19 @@ function renderHorizontalBar(selector, data, groupCol, metric, barColor) {
     const tooltip = d3.select("#tooltip");
     const fmt = metric === "Average_Bed_Days" ? d3.format(".2f") : d3.format(",.0f");
 
+    // Draw bars initially at width 0, then transition in (W10 animation)
     g.selectAll("rect")
         .data(summary)
         .join("rect")
         .attr("y", (d) => y(d.key))
         .attr("x", 0)
         .attr("height", y.bandwidth())
-        .attr("width", (d) => x(d.val))
+        .attr("width", 0)
         .attr("rx", 3)
         .attr("fill", barColor)
+        .attr("tabindex", 0)
+        .attr("role", "button")
+        .attr("aria-label", (d) => `${d.key}: ${fmt(d.val)}. Click to filter all charts to this group.`)
         .style("cursor", "pointer")
         .on("mouseenter", (event, d) => {
             tooltip.classed("hidden", false)
@@ -121,7 +215,15 @@ function renderHorizontalBar(selector, data, groupCol, metric, barColor) {
         .on("mousemove", (event) => {
             tooltip.style("left", `${event.pageX + 12}px`).style("top", `${event.pageY - 28}px`);
         })
-        .on("mouseleave", () => tooltip.classed("hidden", true));
+        .on("mouseleave", () => tooltip.classed("hidden", true))
+        .on("keydown", function(event, d) {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                this.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+            }
+        })
+        .transition().duration(400).ease(d3.easeCubicOut)
+        .attr("width", (d) => x(d.val));
 
     g.selectAll(".val-label")
         .data(summary)
@@ -132,7 +234,10 @@ function renderHorizontalBar(selector, data, groupCol, metric, barColor) {
         .style("font-size", "10.5px")
         .style("font-weight", "600")
         .style("fill", "#374151")
-        .text((d) => fmt(d.val));
+        .style("opacity", 0)
+        .text((d) => fmt(d.val))
+        .transition().delay(350).duration(200)
+        .style("opacity", 1);
 }
 
 function renderVerticalBar(selector, data, groupCol, metric, barColor) {
@@ -153,10 +258,20 @@ function renderVerticalBar(selector, data, groupCol, metric, barColor) {
         return { key, val: getDemoMetricValue(rows, metric) };
     });
 
+    const svgTitleId = `demo-vbar-title-${groupCol.replace(/\s+/g,"-")}`;
+    const svgDescId  = `demo-vbar-desc-${groupCol.replace(/\s+/g,"-")}`;
+
     const svg = container.append("svg")
+        .attr("role", "img")
+        .attr("aria-labelledby", `${svgTitleId} ${svgDescId}`)
         .attr("viewBox", `0 0 ${width} ${height}`)
         .attr("width", "100%")
         .attr("height", "100%");
+
+    svg.append("title").attr("id", svgTitleId)
+        .text(`Hospitalised Injuries by ${groupCol}`);
+    svg.append("desc").attr("id", svgDescId)
+        .text(`Vertical bar chart showing hospitalised road crash injuries broken down by ${groupCol}. Click a bar to cross-filter the other charts.`);
 
     const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
@@ -199,15 +314,19 @@ function renderVerticalBar(selector, data, groupCol, metric, barColor) {
 
     const tooltip = d3.select("#tooltip");
 
+    // Draw bars from baseline up with transition (W10 animation)
     g.selectAll("rect")
         .data(summary)
         .join("rect")
         .attr("x", (d) => x(d.key))
-        .attr("y", (d) => y(d.val))
+        .attr("y", innerHeight)
         .attr("width", x.bandwidth())
-        .attr("height", (d) => innerHeight - y(d.val))
+        .attr("height", 0)
         .attr("rx", 3)
         .attr("fill", barColor)
+        .attr("tabindex", 0)
+        .attr("role", "button")
+        .attr("aria-label", (d) => `${d.key}: ${fmt(d.val)}. Click to filter all charts to this group.`)
         .style("cursor", "pointer")
         .on("mouseenter", (event, d) => {
             tooltip.classed("hidden", false)
@@ -216,9 +335,18 @@ function renderVerticalBar(selector, data, groupCol, metric, barColor) {
         .on("mousemove", (event) => {
             tooltip.style("left", `${event.pageX + 12}px`).style("top", `${event.pageY - 28}px`);
         })
-        .on("mouseleave", () => tooltip.classed("hidden", true));
+        .on("mouseleave", () => tooltip.classed("hidden", true))
+        .on("keydown", function(event, d) {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                this.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+            }
+        })
+        .transition().duration(400).ease(d3.easeCubicOut)
+        .attr("y", (d) => y(d.val))
+        .attr("height", (d) => innerHeight - y(d.val));
 
-    // Value labels on top of bars
+    // Value labels on top of bars (appear after bars animate in)
     g.selectAll(".bar-top-label")
         .data(summary)
         .join("text")
@@ -229,7 +357,10 @@ function renderVerticalBar(selector, data, groupCol, metric, barColor) {
         .style("font-size", "10.5px")
         .style("font-weight", "600")
         .style("fill", "#4b5563")
-        .text((d) => fmt(d.val));
+        .style("opacity", 0)
+        .text((d) => fmt(d.val))
+        .transition().delay(350).duration(200)
+        .style("opacity", 1);
 }
 
 function renderRemotenessDonut(selector, data, metric) {
@@ -251,9 +382,16 @@ function renderRemotenessDonut(selector, data, metric) {
     const total = d3.sum(summary, (d) => d.val) || 1;
 
     const svg = container.append("svg")
+        .attr("role", "img")
+        .attr("aria-labelledby", "demo-donut-title demo-donut-desc")
         .attr("viewBox", `0 0 ${width} ${height}`)
         .attr("width", "100%")
         .attr("height", "100%");
+
+    svg.append("title").attr("id", "demo-donut-title")
+        .text("Share by Remoteness Area");
+    svg.append("desc").attr("id", "demo-donut-desc")
+        .text("Donut chart showing the proportion of hospitalised road crash injuries from Major Cities, Regional, Remote, and other remoteness areas. Click a slice to cross-filter all charts.");
 
     const radius = Math.min(width * 0.44, height) / 2 - 16;
     const centerX = width * 0.3;
@@ -276,6 +414,12 @@ function renderRemotenessDonut(selector, data, metric) {
         .attr("fill", (d) => color(d.data.key))
         .attr("stroke", "#ffffff")
         .attr("stroke-width", 2)
+        .attr("tabindex", 0)
+        .attr("role", "button")
+        .attr("aria-label", (d) => {
+            const pct = ((d.data.val / total) * 100).toFixed(1);
+            return `${d.data.key}: ${d3.format(",")(d.data.val)} (${pct}%). Click to filter all charts to this remoteness area.`;
+        })
         .style("cursor", "pointer")
         .on("mouseenter", (event, d) => {
             const pct = ((d.data.val / total) * 100).toFixed(1);
@@ -285,7 +429,13 @@ function renderRemotenessDonut(selector, data, metric) {
         .on("mousemove", (event) => {
             tooltip.style("left", `${event.pageX + 12}px`).style("top", `${event.pageY - 28}px`);
         })
-        .on("mouseleave", () => tooltip.classed("hidden", true));
+        .on("mouseleave", () => tooltip.classed("hidden", true))
+        .on("keydown", function(event, d) {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                this.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+            }
+        });
 
     // Donut center total text
     g.append("text")
@@ -307,7 +457,20 @@ function renderRemotenessDonut(selector, data, metric) {
     const legend = svg.append("g").attr("transform", `translate(${width * 0.56}, 45)`);
     const rows = legend.selectAll(".leg").data(summary).join("g")
         .attr("class", "leg")
-        .attr("transform", (d, i) => `translate(0, ${i * 28})`);
+        .attr("transform", (d, i) => `translate(0, ${i * 28})`)
+        .attr("tabindex", 0)
+        .attr("role", "button")
+        .attr("aria-label", (d) => {
+            const pct = ((d.val / total) * 100).toFixed(1);
+            return `${d.key}: ${pct}%. Click to filter.`;
+        })
+        .style("cursor", "pointer")
+        .on("keydown", function(event, d) {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                this.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+            }
+        });
 
     rows.append("rect")
         .attr("width", 12)

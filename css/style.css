@@ -352,6 +352,12 @@ body {
     display: none;
 }
 
+/* Keyboard focus ring — WCAG 2.4.7 Focus Visible */
+*:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+}
+
 /* Footer */
 .page-footer {
     border-top: 1px solid #e5e7eb;

@@ -20,3 +20,7 @@ data/raw data/
 # Node / environment (if used)
 node_modules/
 .env
+
+# Reference slides & course materials
+slide/
+

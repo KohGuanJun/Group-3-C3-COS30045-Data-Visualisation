@@ -31,10 +31,12 @@ function renderChart3BedDays(stateSummary, nationalAvgBedDays, filterState, onSe
     const svg = container
         .append("svg")
         .attr("role", "img")
-        .attr("aria-label", "Horizontal bar chart comparing average hospital bed days per road crash injury across states against the national average")
+        .attr("aria-labelledby", "chart3-svg-title chart3-svg-desc")
         .attr("viewBox", `0 0 ${width} ${height}`)
         .attr("width", "100%")
         .attr("height", "100%");
+    svg.append("title").attr("id", "chart3-svg-title").text("Average Bed Days by State");
+    svg.append("desc").attr("id", "chart3-svg-desc").text("Horizontal bar chart comparing average hospital bed days per road crash injury across Australian states, with a dashed vertical benchmark line showing the national average. Click a bar to filter to that state.");
 
     const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
@@ -89,6 +91,12 @@ function renderChart3BedDays(stateSummary, nationalAvgBedDays, filterState, onSe
         .attr("opacity", (d) =>
             filterState.state === "All" || filterState.state === d.State ? 1 : 0.28
         )
+        .attr("tabindex", 0)
+        .attr("role", "button")
+        .attr("aria-label", (d) => {
+            const status = d.Average_Bed_Days >= nationalAvgBedDays ? "above" : "below";
+            return `${d.State}: ${d.Average_Bed_Days.toFixed(2)} average bed days, ${status} national average of ${nationalAvgBedDays.toFixed(2)}. Click to filter to ${d.State}.`;
+        })
         .style("cursor", "pointer")
         .on("mouseenter", (event, d) => {
             const statusText =
@@ -111,6 +119,15 @@ function renderChart3BedDays(stateSummary, nationalAvgBedDays, filterState, onSe
             if (onSelectState) {
                 const nextState = filterState.state === d.State ? "All" : d.State;
                 onSelectState(nextState);
+            }
+        })
+        .on("keydown", (event, d) => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                if (onSelectState) {
+                    const nextState = filterState.state === d.State ? "All" : d.State;
+                    onSelectState(nextState);
+                }
             }
         });
 
@@ -165,10 +182,12 @@ function renderChart4StateShareDonut(stateSummary, filterState, onSelectState) {
     const svg = container
         .append("svg")
         .attr("role", "img")
-        .attr("aria-label", "Donut chart showing proportional share of hospitalised road crash injuries across the eight Australian states and territories")
+        .attr("aria-labelledby", "chart4-svg-title chart4-svg-desc")
         .attr("viewBox", `0 0 ${width} ${height}`)
         .attr("width", "100%")
         .attr("height", "100%");
+    svg.append("title").attr("id", "chart4-svg-title").text("State Share of Hospitalised Injuries");
+    svg.append("desc").attr("id", "chart4-svg-desc").text("Donut chart showing each Australian state and territory's proportional share of total hospitalised road crash injuries. Click a slice or legend item to filter all charts to that state.");
 
     const radius = Math.min(width * 0.42, height) / 2 - 12;
     const centerX = width * 0.28;
@@ -198,6 +217,12 @@ function renderChart4StateShareDonut(stateSummary, filterState, onSelectState) {
         .attr("opacity", (d) =>
             filterState.state === "All" || filterState.state === d.data.State ? 1 : 0.25
         )
+        .attr("tabindex", 0)
+        .attr("role", "button")
+        .attr("aria-label", (d) => {
+            const pct = ((d.data.Hospitalised_Injuries / totalInjuries) * 100).toFixed(1);
+            return `${d.data.State}: ${d3.format(",")(d.data.Hospitalised_Injuries)} injuries (${pct}%). Click to filter to ${d.data.State}.`;
+        })
         .style("cursor", "pointer")
         .on("mouseenter", (event, d) => {
             const pct = ((d.data.Hospitalised_Injuries / totalInjuries) * 100).toFixed(1);
@@ -218,6 +243,15 @@ function renderChart4StateShareDonut(stateSummary, filterState, onSelectState) {
             if (onSelectState) {
                 const nextState = filterState.state === d.data.State ? "All" : d.data.State;
                 onSelectState(nextState);
+            }
+        })
+        .on("keydown", (event, d) => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                if (onSelectState) {
+                    const nextState = filterState.state === d.data.State ? "All" : d.data.State;
+                    onSelectState(nextState);
+                }
             }
         });
 
@@ -250,11 +284,26 @@ function renderChart4StateShareDonut(stateSummary, filterState, onSelectState) {
         .attr("opacity", (d) =>
             filterState.state === "All" || filterState.state === d.State ? 1 : 0.35
         )
+        .attr("tabindex", 0)
+        .attr("role", "button")
+        .attr("aria-label", (d) => {
+            const pct = ((d.Hospitalised_Injuries / totalInjuries) * 100).toFixed(1);
+            return `${d.State}: ${d3.format(",")(d.Hospitalised_Injuries)} (${pct}%). Click to filter to ${d.State}.`;
+        })
         .style("cursor", "pointer")
         .on("click", (event, d) => {
             if (onSelectState) {
                 const nextState = filterState.state === d.State ? "All" : d.State;
                 onSelectState(nextState);
+            }
+        })
+        .on("keydown", (event, d) => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                if (onSelectState) {
+                    const nextState = filterState.state === d.State ? "All" : d.State;
+                    onSelectState(nextState);
+                }
             }
         });
 

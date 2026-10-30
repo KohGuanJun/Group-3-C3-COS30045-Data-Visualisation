@@ -29,14 +29,18 @@ function renderChart1Trend(data, filterState, onSelectYear, onSelectState) {
     const metric = filterState.metric;
     const mode = filterState.trendMode;
 
-    // Accessible SVG with role and aria-label
+    // Accessible SVG with role, aria-labelledby, <title> and <desc>
+    const svgTitleId1 = "chart1-svg-title";
+    const svgDescId1  = "chart1-svg-desc";
     const svg = container
         .append("svg")
         .attr("role", "img")
-        .attr("aria-label", "Line chart showing annual road crash hospitalisations from 2011 to 2021")
+        .attr("aria-labelledby", `${svgTitleId1} ${svgDescId1}`)
         .attr("viewBox", `0 0 ${width} ${height}`)
         .attr("width", "100%")
         .attr("height", "100%");
+    svg.append("title").attr("id", svgTitleId1).text("Annual Road Crash Hospitalisations 2011–2021");
+    svg.append("desc").attr("id", svgDescId1).text("Line chart showing the trend of hospitalised road crash injuries across Australia (or a selected state) from 2011 to 2021. Each data point can be clicked to filter all charts to that year.");
 
     const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
@@ -129,6 +133,13 @@ function renderChart1Trend(data, filterState, onSelectYear, onSelectState) {
             .attr("fill", (d) => (String(d.Year) === String(filterState.year) ? "#111827" : activeColor))
             .attr("stroke", "#ffffff")
             .attr("stroke-width", 2)
+            .attr("tabindex", 0)
+            .attr("role", "button")
+            .attr("aria-label", (d) => {
+                const scopeName = filterState.state === "All" ? "All Australia" : filterState.state;
+                const fmt = metric === "Average_Bed_Days" ? d[metric].toFixed(2) : d3.format(",")(d[metric]);
+                return `${scopeName} ${d.Year}: ${metricLabels[metric] || metric} ${fmt}. Click to filter to this year.`;
+            })
             .style("cursor", "pointer")
             .on("mouseenter", (event, d) => {
                 const idx = trendSeries.findIndex((item) => item.Year === d.Year);
@@ -160,6 +171,15 @@ function renderChart1Trend(data, filterState, onSelectYear, onSelectState) {
                 if (onSelectYear) {
                     const nextYear = String(filterState.year) === String(d.Year) ? "All" : String(d.Year);
                     onSelectYear(nextYear);
+                }
+            })
+            .on("keydown", (event, d) => {
+                if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    if (onSelectYear) {
+                        const nextYear = String(filterState.year) === String(d.Year) ? "All" : String(d.Year);
+                        onSelectYear(nextYear);
+                    }
                 }
             });
     } else {
@@ -251,11 +271,23 @@ function renderChart1Trend(data, filterState, onSelectYear, onSelectState) {
                 filterState.state === "All" || filterState.state === d.State ? 0.95 : 0.18
             )
             .attr("d", (d) => line(d.values))
+            .attr("tabindex", 0)
+            .attr("role", "button")
+            .attr("aria-label", (d) => `${d.State} trend line. Click to filter to ${d.State}.`)
             .style("cursor", "pointer")
             .on("click", (event, d) => {
                 if (onSelectState) {
                     const nextSt = filterState.state === d.State ? "All" : d.State;
                     onSelectState(nextSt);
+                }
+            })
+            .on("keydown", (event, d) => {
+                if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    if (onSelectState) {
+                        const nextSt = filterState.state === d.State ? "All" : d.State;
+                        onSelectState(nextSt);
+                    }
                 }
             });
 
@@ -284,6 +316,12 @@ function renderChart1Trend(data, filterState, onSelectYear, onSelectState) {
             .attr("opacity", (d) =>
                 filterState.state === "All" || filterState.state === d.State ? 0.95 : 0.15
             )
+            .attr("tabindex", 0)
+            .attr("role", "button")
+            .attr("aria-label", (d) => {
+                const rawFmt = metric === "Average_Bed_Days" ? d.rawVal.toFixed(2) : d3.format(",")(d.rawVal);
+                return `${d.State} ${d.Year}: ${rawFmt}. Click to filter to ${d.State}.`;
+            })
             .style("cursor", "pointer")
             .on("mouseenter", (event, d) => {
                 const rawFormatted =
@@ -307,6 +345,15 @@ function renderChart1Trend(data, filterState, onSelectYear, onSelectState) {
                 if (onSelectState) {
                     const nextSt = filterState.state === d.State ? "All" : d.State;
                     onSelectState(nextSt);
+                }
+            })
+            .on("keydown", (event, d) => {
+                if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    if (onSelectState) {
+                        const nextSt = filterState.state === d.State ? "All" : d.State;
+                        onSelectState(nextSt);
+                    }
                 }
             });
     }
@@ -343,10 +390,12 @@ function renderChart2StateBars(stateSummary, filterState, onSelectState) {
     const svg = container
         .append("svg")
         .attr("role", "img")
-        .attr("aria-label", "Vertical bar chart comparing road crash hospitalisations across Australian states and territories")
+        .attr("aria-labelledby", "chart2-svg-title chart2-svg-desc")
         .attr("viewBox", `0 0 ${width} ${height}`)
         .attr("width", "100%")
         .attr("height", "100%");
+    svg.append("title").attr("id", "chart2-svg-title").text("Hospitalised Injuries by State");
+    svg.append("desc").attr("id", "chart2-svg-desc").text("Vertical bar chart comparing total hospitalised road crash injuries across Australian states and territories. Click a bar to filter all charts to that state.");
 
     const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
@@ -412,6 +461,13 @@ function renderChart2StateBars(stateSummary, filterState, onSelectState) {
         .attr("opacity", (d) =>
             filterState.state === "All" || filterState.state === d.State ? 1 : 0.25
         )
+        .attr("tabindex", 0)
+        .attr("role", "button")
+        .attr("aria-label", (d) => {
+            const sharePct = ((d[metric] / totalAcrossStates) * 100).toFixed(1);
+            const fmt = isShare ? `${d.plotVal.toFixed(1)}%` : d3.format(",")(d.plotVal);
+            return `${d.State}: ${fmt} (${sharePct}% of national total). Click to filter to ${d.State}.`;
+        })
         .style("cursor", "pointer")
         .on("mouseenter", (event, d) => {
             const sharePct = ((d[metric] / totalAcrossStates) * 100).toFixed(1);
@@ -435,6 +491,15 @@ function renderChart2StateBars(stateSummary, filterState, onSelectState) {
             if (onSelectState) {
                 const nextState = filterState.state === d.State ? "All" : d.State;
                 onSelectState(nextState);
+            }
+        })
+        .on("keydown", (event, d) => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                if (onSelectState) {
+                    const nextState = filterState.state === d.State ? "All" : d.State;
+                    onSelectState(nextState);
+                }
             }
         });
 

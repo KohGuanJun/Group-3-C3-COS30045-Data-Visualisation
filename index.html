@@ -218,8 +218,33 @@
         <div id="view-glossary" class="view-section">
             <div class="text-box">
                 <h2>Glossary &amp; Data Notes</h2>
-                <p><strong>Data Source:</strong> Bureau of Infrastructure and Transport Research Economics (BITRE) – Hospitalised Injury Data (2011–2021).</p>
-                <p><strong>Note on Count Data:</strong> The dataset reports absolute counts of hospitalised injuries. Direct comparison of raw counts across jurisdictions (e.g., NSW or Victoria vs. Northern Territory) should take population size differences into account. Use the <em>% Change Since 2011</em> mode and <em>Average Bed Days</em> views to compare relative growth and injury severity fairly across states.</p>
+
+                <h3 style="font-size:13px;font-weight:700;color:#1f2937;margin:12px 0 6px;">Data Source</h3>
+                <p><strong>BITRE</strong> – Bureau of Infrastructure and Transport Research Economics.
+                   Hospitalised Injury Data (2011–2021), Australian Road Traffic dataset.
+                   All figures represent cases where a road-crash victim was admitted to hospital
+                   (not merely treated at an emergency department and discharged).</p>
+
+                <h3 style="font-size:13px;font-weight:700;color:#1f2937;margin:12px 0 6px;">Key Metric Definitions</h3>
+                <p><strong>Hospitalised Injuries:</strong> The total number of people admitted to hospital as a result of a road traffic crash injury in the reference period.</p>
+                <p><strong>Total Bed Days:</strong> The cumulative number of nights patients spent in hospital across all admissions. A higher figure indicates greater overall burden on the health system.</p>
+                <p><strong>Average Bed Days (per admission):</strong> Total Bed Days divided by the number of Hospitalised Injuries. This is a proxy for injury severity — a higher average means patients were more seriously hurt and required longer recovery in hospital.</p>
+
+                <h3 style="font-size:13px;font-weight:700;color:#1f2937;margin:12px 0 6px;">Demographic &amp; Geographic Breakdowns</h3>
+                <p><strong>Road User Type:</strong> The role of the injured person in the crash (e.g., Car driver, Motorcyclist, Pedestrian). Categories come directly from BITRE classification.</p>
+                <p><strong>ABS Remoteness Area:</strong> Geographic classification from the Australian Bureau of Statistics (ABS) ASGS Remoteness Structure — Major Cities, Regional, Remote, and Very Remote. Reflects accessibility to services rather than population density alone.</p>
+                <p><strong>Age Group:</strong> Grouped age brackets as reported in the BITRE dataset (0–7, 8–16, 17–25, 26–39, 40–64, 65–74, 75+).</p>
+                <p><strong>Sex:</strong> Recorded sex of the injured person (Female, Male, Intersex or indeterminate or missing).</p>
+
+                <h3 style="font-size:13px;font-weight:700;color:#1f2937;margin:12px 0 6px;">Important Data Limitations</h3>
+                <p><strong>Population size differences:</strong> Direct comparison of raw injury counts across jurisdictions (e.g., NSW vs. Northern Territory) is misleading without accounting for population size. NSW has ~8× the population of the NT. Use the <em>% Change Since 2011</em> mode and <em>Average Bed Days</em> views to compare relative trends and injury severity fairly.</p>
+                <p><strong>Year-on-year variation:</strong> The 2020 data reflects the impact of COVID-19 travel restrictions, which significantly reduced road traffic volumes and, consequently, crash numbers across all states. Treat 2020 figures with caution when making comparisons.</p>
+                <p><strong>Missing &amp; unknown categories:</strong> A small proportion of records have unknown road user type, age, or sex. These appear as "Missing" or "Unknown" in the demographic charts and are retained to preserve the total injury count.</p>
+
+                <h3 style="font-size:13px;font-weight:700;color:#1f2937;margin:12px 0 6px;">Methodology Notes</h3>
+                <p><strong>Weighted average bed days:</strong> The national and state average bed days shown in the KPI cards and Chart 3 are computed as a <em>weighted</em> average: Total Bed Days &divide; Total Hospitalised Injuries (not an arithmetic mean of per-year averages), ensuring that high-volume years do not distort the result.</p>
+                <p><strong>% Change Since 2011 (indexed mode):</strong> Each state's value in a given year is expressed relative to its own 2011 baseline: ((value &minus; baseline) &divide; baseline) &times; 100. This removes the effect of absolute size differences and highlights growth or decline patterns.</p>
+                <p><strong>Cross-chart filtering:</strong> Clicking any bar, slice, or data point will filter all charts on that tab simultaneously. Use the <em>Reset</em> button in the filter bar to clear all selections.</p>
             </div>
         </div>
     </main>
