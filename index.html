@@ -27,6 +27,7 @@
             <div class="tabs" role="tablist">
                 <button class="tab-btn active" data-view="overview" role="tab">State &amp; National Trends</button>
                 <button class="tab-btn" data-view="demographics" role="tab">Demographics &amp; Road Users</button>
+                <button class="tab-btn" data-view="first-nations" role="tab">First Nations Insights</button>
                 <button class="tab-btn" data-view="glossary" role="tab">Glossary &amp; Notes</button>
             </div>
         </div>
@@ -214,7 +215,52 @@
             </div>
         </div>
 
-        <!-- View 3: Glossary -->
+        <!-- View 3: First Nations Insights -->
+        <div id="view-first-nations" class="view-section">
+            <div class="finding-bar" id="fn-key-finding" role="status" aria-live="polite">
+                <strong>Key Finding:</strong> Loading First Nations hospitalisation insights...
+            </div>
+            <div class="chart-grid">
+                <!-- 1: Trend Line Chart -->
+                <div class="chart-box">
+                    <div class="chart-header">
+                        <h2 id="title-fn-1">First Nations vs Non-Indigenous Trend (2011–2021)</h2>
+                        <span class="chart-hint">Annual hospitalisation trends</span>
+                    </div>
+                    <div id="fn-chart-trend" class="chart-area"></div>
+                </div>
+
+                <!-- 2: Remoteness Grouped Bar Chart -->
+                <div class="chart-box">
+                    <div class="chart-header">
+                        <h2 id="title-fn-2">First Nations Share by Remoteness Area</h2>
+                        <span class="chart-hint">Major Cities vs Regional &amp; Remote</span>
+                    </div>
+                    <div id="fn-chart-remoteness" class="chart-area"></div>
+                </div>
+
+                <!-- 3: Age Group Column Chart -->
+                <div class="chart-box">
+                    <div class="chart-header">
+                        <h2 id="title-fn-3">Injuries by Age Group</h2>
+                        <span class="chart-hint">Distribution across age brackets</span>
+                    </div>
+                    <div id="fn-chart-age" class="chart-area"></div>
+                </div>
+
+                <!-- 4: Road User Bar Chart -->
+                <div class="chart-box">
+                    <div class="chart-header">
+                        <h2 id="title-fn-4">First Nations Injuries by Road User Type</h2>
+                        <span class="chart-hint">Top road user groups</span>
+                    </div>
+                    <div id="fn-chart-roaduser" class="chart-area"></div>
+                </div>
+            </div>
+        </div>
+        
+
+        <!-- View 4: Glossary -->
         <div id="view-glossary" class="view-section">
             <div class="text-box">
                 <h2>Glossary &amp; Data Notes</h2>
@@ -266,5 +312,6 @@
     <script src="js/main.js"></script>
     <script src="js/demographics.js"></script>
     <script src="js/demographics-select.js"></script>
+    <script src="js/first_nations.js"></script>
 </body>
 </html>
